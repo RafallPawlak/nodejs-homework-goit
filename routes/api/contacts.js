@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.get("/", async (req, res, next) => {
   const response = await listContacts();
-  return res.status(200).json({ message: response });
+  return res.status(200).json(response);
 });
 
 router.get("/:id", async (req, res, next) => {
