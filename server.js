@@ -1,22 +1,20 @@
-const express = require('express')
-const cors = require('cors')
-const dotenv = require("dotenv");
+const express = require('express');
+const cors = require('cors');
+const app = express();
+const dotenv = require('dotenv');
+const PORT = 3000;
+const contactsRouter = require('./routes/api/contacts');
 dotenv.config();
 
-const contactsRouter = require('./routes/api/contacts')
-const { connectDatabase } = require("./service/database");
+const { connectDatabase } = require('./service/database');
 connectDatabase();
 
-const app = express()
-app.use(express.json())
-app.use(cors())
-
- app.use('/api/contacts', contactsRouter)
-
-const PORT = 3000;
+app.use(express.json());
+app.use(cors());
+app.use('/api/contacts', contactsRouter);
 
 app.listen(PORT, () => {
-  console.log(`Server running. Use our API on port: ${PORT}`)
+  console.log(`Server running. Use our API on port: ${PORT}`);
 });
   
 module.exports = app;

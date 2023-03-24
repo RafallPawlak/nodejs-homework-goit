@@ -27,10 +27,18 @@ const updateContact = async (_id, body) => {
   return updateContact;
 };
 
+const updateFavorite = async (_id, body) => {
+  const updateFavorite = await Contact.findByIdAndUpdate(_id, body);
+   updateFavorite.favorite = body;
+  return getContactById(_id);
+};
+
+
 module.exports = {
   listContacts,
   getContactById,
   removeContact,
   addContact,
-  updateContact
+  updateContact,
+  updateFavorite
 }

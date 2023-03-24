@@ -3,7 +3,8 @@ const { listContacts,
   getContactById,
   removeContact,
   addContact,
-  updateContact } = require('../../controllers/contacts');
+  updateContact,
+  updateFavorite } = require('../../controllers/contacts');
 
 const router = express.Router();
 
@@ -28,7 +29,6 @@ router.get("/:id", async (req, res, next) => {
 router.post('/', async (req, res, next) => {
   try {
     const contact = await addContact(req.body);
-    console.log(contact);
     return res.status(201).json(contact);
   } catch {
     return res.status(500).json({"message": "Something went wrong"});
@@ -50,7 +50,6 @@ router.delete("/:id", async (req, res, next) => {
 
 router.put("/:id", async (req, res, next) => {
   const { id } = req.params;
-  
   if (!id) {
     return res.status(404).json({ "message": "Not found" });
   }
@@ -65,6 +64,7 @@ try {
 
 router.patch("/:id/favorite", async (req, res, next) => {
   const { id } = req.params;
+  const { favorite = false } = req.body
   if (!id) {
     return res.status(404).json({ "message": "Not found" });
   }
@@ -72,8 +72,8 @@ router.patch("/:id/favorite", async (req, res, next) => {
     if (typeof req.body.favorite !== "boolean") {
       return res.status(400).send({ "message": "missing field favorite" });
     }
-    const favoritetUpdate = await updateContact( id, req.body);
-    return res.status(200).json(favoritetUpdate);
+    const favoriteUpdate = await updateFavorite( id, { favorite });
+    return res.status(200).json(favoriteUpdate);
   } catch (error) {
     next(error);
     return res.status(500).json({ "message": "Something went wrong" });
