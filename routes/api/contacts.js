@@ -1,12 +1,11 @@
-const express = require("express");
-
-const {listContacts,
+const express = require('express')
+const { listContacts,
   getContactById,
   removeContact,
   addContact,
-  updateContact} = require("../../models/contacts");
-const { contactSchema } = require("../../models/contacts");
- 
+  updateContact,
+  updateFavorite } = require('../../controllers/contacts');
+
 const router = express.Router();
 
 router.get("/", async (req, res, next) => {
@@ -28,10 +27,6 @@ router.get("/:id", async (req, res, next) => {
 });
 
 router.post('/', async (req, res, next) => {
-  const { error } = contactSchema.validate(req.body);
-  if (error) {
-    return res.status(400).json({"message": "missing required name - field"});
-  }
   try {
     const contact = await addContact(req.body);
     return res.status(201).json(contact);
@@ -46,26 +41,41 @@ router.delete("/:id", async (req, res, next) => {
     return res.status(404).json({ "message": "Not found"});
   }
   try {
-    removeContact(id);
+    await removeContact(id);
     return res.status(200).json({"message": "contact deleted"});
   } catch {
     return res.status(500).json({ "message": "Something went wrong" });
   }
 })
 
-router.put('/:id', async (req, res, next) => {
+router.put("/:id", async (req, res, next) => {
   const { id } = req.params;
- if (!id) {
-    return res.status(404).json({ "message": "Not found"});
+  if (!id) {
+    return res.status(404).json({ "message": "Not found" });
   }
-    const { error } = contactSchema.validate(req.body);
-    if (error) {
-      return res.status(400).json({"message": "missing fields"});
-    }
+try {
+    const contactUpdate = await updateContact( id, req.body);
+    return res.status(200).json(contactUpdate);
+  } catch (error) {
+    next(error);
+    return res.status(500).json({ "message": "Something went wrong" });
+  }
+});
+
+router.patch("/:id/favorite", async (req, res, next) => {
+  const { id } = req.params;
+  const { favorite = false } = req.body
+  if (!id) {
+    return res.status(404).json({ "message": "Not found" });
+  }
   try {
-    const contact = await updateContact(id, req.body);
-    return res.status(200).json(contact);
-  } catch {
+    if (typeof req.body.favorite !== "boolean") {
+      return res.status(400).send({ "message": "missing field favorite" });
+    }
+    const favoriteUpdate = await updateFavorite( id, { favorite });
+    return res.status(200).json(favoriteUpdate);
+  } catch (error) {
+    next(error);
     return res.status(500).json({ "message": "Something went wrong" });
   }
 });
