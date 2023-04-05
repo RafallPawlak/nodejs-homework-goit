@@ -1,4 +1,5 @@
-const express = require('express')
+const express = require('express');
+const auth = require("../../auth/auth");
 const { listContacts,
   getContactById,
   removeContact,
@@ -8,12 +9,14 @@ const { listContacts,
 
 const router = express.Router();
 
-router.get("/", async (req, res, next) => {
-  const response = await listContacts();
+router.get("/", auth, async (req, res, next) => {
+  const ownerId = req.user.id;
+  const response = await listContacts(ownerId);
   return res.status(200).json(response);
 });
 
-router.get("/:id", async (req, res, next) => {
+
+router.get("/:id", auth, async (req, res, next) => {
   try {
     const { id } = req.params;
     const response = await getContactById(id);
@@ -26,16 +29,17 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
-router.post('/', async (req, res, next) => {
+router.post('/', auth, async (req, res, next) => {
+  const id = req.user.id;
   try {
-    const contact = await addContact(req.body);
+    const contact = await addContact(req.body, id);
     return res.status(201).json(contact);
   } catch {
     return res.status(500).json({"message": "Something went wrong"});
   }
 })
 
-router.delete("/:id", async (req, res, next) => {
+router.delete("/:id", auth, async (req, res, next) => {
   const { id } = req.params;
   if (!id) {
     return res.status(404).json({ "message": "Not found"});
@@ -48,7 +52,7 @@ router.delete("/:id", async (req, res, next) => {
   }
 })
 
-router.put("/:id", async (req, res, next) => {
+router.put("/:id", auth, async (req, res, next) => {
   const { id } = req.params;
   if (!id) {
     return res.status(404).json({ "message": "Not found" });
@@ -62,7 +66,7 @@ try {
   }
 });
 
-router.patch("/:id/favorite", async (req, res, next) => {
+router.patch("/:id/favorite", auth, async (req, res, next) => {
   const { id } = req.params;
   const { favorite = false } = req.body
   if (!id) {
