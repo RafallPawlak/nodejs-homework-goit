@@ -9,6 +9,7 @@ const {
 const { userSchema } = require("../../models/user");
 const auth = require("../../auth/auth");
 const loginHandler = require("../../auth/loginHandler");
+const gravatar = require('gravatar');
 
 const router = express.Router();
 
@@ -22,8 +23,9 @@ router.post("/signup", async (req, res, next) => {
     const user = await getUserByEmail(email);
     if (user) {
       return res.status(409).json({ message: "Email in use" });
-    }
-    const newUser = await createUser(email, password);
+   }
+    const avatarURL = gravatar.url(email, {s: '100', r: 'x', d: 'retro'}, false);
+   const newUser = await createUser(email, password, avatarURL);
     res.status(201).json(newUser);
   } catch (error) {
     next(error);
@@ -65,6 +67,8 @@ router.post("/logout", auth, async (req, res, next) => {
 
 router.get("/current", auth, async (req, res) => {
   const id = req.user.id;
+  const url = gravatar.url('emerleite@gmail.com', { s: '200', r: 'pg', d: '404' });
+  console.log(url);
   try {
     const user = await getCurrentUser(id);
     if (!user) {
