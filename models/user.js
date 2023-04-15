@@ -20,6 +20,9 @@ const users = new Schema(
             enum: ["starter", "pro", "business"],
             default: "starter"
         },
+        avatarURL: {
+            type: String,
+        },
         token: {
             type: String,
             default: null,
@@ -29,6 +32,7 @@ const users = new Schema(
 const userValidationSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().min(6).required(),
+  avatarURL: Joi.string(),
 });
 
 const hashPassword = (pass) => {
