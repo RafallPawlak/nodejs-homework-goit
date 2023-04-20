@@ -8,7 +8,7 @@ const createUser = async (email, password, avatarURL) => {
     const user = new User({ email, password: hashedPassword, avatarURL, verify: false,
       verificationToken: uuidv4()
     });
-    sendVerificationEmail(user.verificationToken);
+    sendVerificationEmail(email, user.verificationToken);
     user.save();
     return user;
   } catch (error) {
@@ -43,10 +43,10 @@ const verificationUser = async (verificationToken) => {
   return user;
 };
 
-const sendVerificationEmail = async (verificationToken) => {
+const sendVerificationEmail = async (email, verificationToken) => {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY)
   const msg = {
-    to: 'example@example.pl',
+    to: email,
     from: 'rafall.pawlak@gmail.com',
     subject: 'Verification email',
     text: 'Node.js',
