@@ -26,8 +26,16 @@ const users = new Schema(
         token: {
             type: String,
             default: null,
-        }
-    }, { versionKey: false, timestamps: true });
+        },
+        verify: {
+            type: Boolean,
+            default: false,
+        },
+        verificationToken: {
+            type: String,
+            required: [true, 'Verify token is required'],
+        },
+        }, { versionKey: false, timestamps: true });
 
 const userValidationSchema = Joi.object({
   email: Joi.string().email().required(),

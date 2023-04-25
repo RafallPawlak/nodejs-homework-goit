@@ -3,6 +3,8 @@ const {
   createUser,
   getUserByEmail,
   updateAvatar,
+  verificationUser,
+  sendVerificationEmail,
   getCurrentUser,
   logIn,
   logOut,
@@ -102,6 +104,43 @@ router.post("/logout", auth, async (req, res, next) => {
   }
 });
 
+router.get("/verify/:verificationToken", async (req, res, next) => {
+  try {
+    const { verificationToken } = req.params;
+    const user = await verificationUser(verificationToken);
+    if (user) {
+      return res.status(200).json({ message: "Verification successful" });
+    } else {
+      return res.status(404).json({ message: "User not found" });
+    }
+  } catch (error) {
+    next(error);
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+});
+
+router.post("/verify", async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: "Missing required field email" });
+    }
+    const user = await getUserByEmail(email);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    if (user.verify) {
+      return res.status(400).json({ message: "Verification has already been passed" });
+    }
+    const sendEmail = await sendVerificationEmail(user.verificationToken);
+      return res.status(201).json(sendEmail);
+  }
+  catch (error) {
+    next(error);
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+});
+    
 router.get("/current", auth, async (req, res) => {
   const id = req.user.id;
   const url = gravatar.url('emerleite@gmail.com', { s: '200', r: 'pg', d: '404' });
